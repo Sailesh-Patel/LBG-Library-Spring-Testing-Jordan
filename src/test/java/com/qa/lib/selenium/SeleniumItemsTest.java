@@ -15,14 +15,10 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(OrderAnnotation.class)
-@Sql(scripts = { "classpath:person-schema.sql",
-		"classpath:person-data.sql" }, executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-public class SeleniumTest {
+public class SeleniumItemsTest {
 
 	private RemoteWebDriver driver;
 
@@ -37,29 +33,40 @@ public class SeleniumTest {
 	}
 
 	@Test
-	@Order(2)
-	void testCreateCustomer() {
+	@Order(1)
+	void testCreateItem() {
 		this.driver.get("http://localhost:" + this.port);
-		String customer = "Barry";
-		WebElement name = this.driver.findElement(
-				By.cssSelector("#root > main > div > section:nth-child(1) > div:nth-child(2) > form > div > input"));
-		name.sendKeys(customer);
+		String itemtype = "Apple";
+		WebElement type = this.driver.findElement(By.cssSelector(
+				"#root > main > div > section:nth-child(2) > div:nth-child(2) > form > div > input:nth-child(1)"));
+		type.sendKeys(itemtype);
 
-		WebElement register = this.driver.findElement(By.cssSelector("#button-addon2"));
-		register.click();
+		String itemname = "Gale";
+		WebElement name = this.driver.findElement(By.cssSelector(
+				"#root > main > div > section:nth-child(2) > div:nth-child(2) > form > div > input:nth-child(2)"));
+		name.sendKeys(itemname);
 
-		WebElement created = this.driver.findElement(
-				By.cssSelector("#root > main > div > section:nth-child(1) > div:nth-child(3) > h3:nth-child(2)"));
-		Assertions.assertEquals(customer, created.getText());
+		WebElement submit = this.driver.findElement(
+				By.cssSelector("#root > main > div > section:nth-child(2) > div:nth-child(2) > form > div > button"));
+		submit.click();
+
+		WebElement created = this.driver
+				.findElement(By.cssSelector("#root > main > div > section:nth-child(2) > div:nth-child(3) > h3"));
+		Assertions.assertEquals(itemname + " " + "(" + itemtype + ")", created.getText());
 	}
 
 	@Test
-	@Order(1)
-	void testGetCustomer() {
+	@Order(2)
+	void testGetItem() {
 		this.driver.get("http://localhost:" + this.port);
 
 		WebElement created = this.driver
-				.findElement(By.cssSelector("#root > main > div > section:nth-child(1) > div:nth-child(3) > h3"));
-		Assertions.assertEquals("Piers", created.getText());
+				.findElement(By.cssSelector("#root > main > div > section:nth-child(2) > div:nth-child(3) > h3"));
+		Assertions.assertEquals("Gale (Apple)", created.getText());
 	}
+
+//	@AfterEach
+//	void tearDown() {
+//		this.driver.quit();
+//	}
 }
